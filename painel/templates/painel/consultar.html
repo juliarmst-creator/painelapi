@@ -15,6 +15,15 @@
 <body>
     <h1>Painel de Cotações</h1>
 
+{% if sucesso_multiplas %}
+    <div class="ok">
+        <strong>Cotações registradas:</strong>
+        {% for item in registros %}
+            <p>{{ item.moeda_origem }}/{{ item.moeda_destino }} = R$ {{ item.valor }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+
     {% if sucesso %}
         <div class="ok">
             Cotação registrada: <strong>{{ registro.moeda_origem }}/{{ registro.moeda_destino }}
@@ -25,6 +34,8 @@
     {% endif %}
 
     <p><a href="{% url 'consultar' %}">Consultar novamente</a></p>
+    <p><a href="{% url 'consultar-multiplas' %}">Consultar USD, EUR e BTC</a></p>
+
 
     <h2>Histórico de consultas</h2>
     <p id="status-historico">Carregando histórico...</p>

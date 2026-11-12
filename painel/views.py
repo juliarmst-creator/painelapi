@@ -33,3 +33,34 @@ class HistoricoCotacaoView(generics.ListAPIView):
 
     def get_queryset(self):
         return RegistroCotacao.objects.order_by('-data_hora_consulta', '-id')
+
+
+def consultar_multiplas_cotacoes(request):
+    contexto = {}
+    try:
+        resposta = requests.get(settings.COTACOES_MULTIPLAS_URL, timeout=5)
+        resposta.raise_for_status()
+        dados = resposta.json()
+
+        moedas = ['USD', 'EUR', 'BTC']
+        registros = []
+
+        for moeda in moedas:
+            valor = Decimal(dados[f'{moeda}BRL']['bid'])
+            registros.append(
+                RegistroCotacao(
+                    moeda_origem=moeda,
+                    moeda_destino='BRL',
+                    valor=valor
+                )
+            )
+
+        RegistroCotacao.objects.bulk_create(registros)
+        contexto = {'sucesso_multiplas': True, 'registros': registros}
+
+    except requests.exceptions.RequestException:
+        contexto = {'erro': 'Não foi possível consultar as cotações agora.'}
+    except (ValueError, KeyError, TypeError, InvalidOperation):
+        contexto = {'erro': 'A API externa respondeu em um formato inesperado.'}
+
+    return render(request, 'painel/consultar.html', contexto)

@@ -133,3 +133,8 @@ MAILERS = {
 COTACAO_URL = os.environ.get(
     "COTACAO_URL", "https://economia.awesomeapi.com.br/json/last/USD-BRL"
 )
+
+COTACOES_MULTIPLAS_URL = os.environ.get(
+    "COTACOES_MULTIPLAS_URL",
+    "https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,BTC-BRL"
+)
