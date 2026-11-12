@@ -74,5 +74,38 @@ Também executei os oito testes automatizados com o comando python manage.py tes
 Todos os oito testes automatizados passaram com sucesso, apresentando o resultado OK no terminal.
 
 
+## Desafio Extra 4 — Consultas Agendadas
+
+Foi criado um comando personalizado do Django para consultar automaticamente as cotações de USD, EUR e BTC.
+
+O comando pode ser executado pelo terminal:
+
+python manage.py consultar_cotacoes
+
+O sistema utiliza a AwesomeAPI para obter as cotações e registra os valores no banco de dados.
+
+### Agendamento automático
+
+No Windows 10, foi utilizado o Agendador de Tarefas para executar o comando automaticamente a cada 10 minutos.
+
+Configuração da tarefa:
+
+- Nome: Painel de Cotações - Atualização Automática
+- Programa: venv\Scripts\python.exe
+- Argumentos: manage.py consultar_cotacoes
+- Iniciar em: pasta principal do projeto
+- Frequência: a cada 10 minutos
+
+O agendamento depende de o computador estar ligado e com acesso à internet.
+
+### Teste realizado
+
+O comando foi executado manualmente com sucesso.
+
+Também foi testado pelo Agendador de Tarefas, que apresentou o resultado 0x0, indicando uma execução concluída com êxito.
+
+Os registros das três moedas foram conferidos no Django Admin.
+
+
 ## Autor
 Júlia Ramos Dos Santos — IESB 2026
