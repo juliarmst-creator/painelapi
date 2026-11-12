@@ -7,6 +7,9 @@ guarda o histórico no banco e o exibe com fetch().
 - /consultar/ busca a cotação e salva um registro
 - Tratamento de falhas de rede no servidor e no navegador
 - /api/historico/ (JSON, mais recente primeiro)
+- Consulta múltipla de USD, EUR e BTC em uma única requisição
+- Gráfico de variação das cotações com Chart.js, permitindo selecionar a moeda
+
 
 ## Como rodar
 1. python -m venv venv e ative o ambiente

@@ -46,6 +46,24 @@
         <tbody></tbody>
     </table>
 
+
+<h2>Gráfico de variação das cotações</h2>
+
+<label for="moeda-grafico">Selecione a moeda:</label>
+<select id="moeda-grafico">
+    <option value="USD">Dólar (USD)</option>
+    <option value="EUR">Euro (EUR)</option>
+    <option value="BTC">Bitcoin (BTC)</option>
+</select>
+
+<p id="status-grafico">Aguardando histórico...</p>
+
+<div style="height: 320px;">
+    <canvas id="grafico-cotacoes"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
         const status = document.getElementById('status-historico');
         const tabela = document.getElementById('tabela-historico');
@@ -78,6 +96,74 @@
                     });
                     corpo.appendChild(linha);
                 });
+
+
+                const seletor = document.getElementById('moeda-grafico');
+                const statusGrafico = document.getElementById('status-grafico');
+                const canvas = document.getElementById('grafico-cotacoes');
+
+                let grafico = null;
+
+                function atualizarGrafico() {
+                    const moeda = seletor.value;
+
+                    const dadosMoeda = registros
+                        .filter(function (r) {
+                            return r.moeda_origem === moeda &&
+                                   r.moeda_destino === 'BRL';
+                        })
+                        .reverse();
+
+                    if (grafico) {
+                        grafico.destroy();
+                        grafico = null;
+                    }
+
+                    if (dadosMoeda.length === 0) {
+                        statusGrafico.textContent =
+                            'Nenhuma cotação registrada para ' + moeda;
+                        return;
+                    }
+
+                    if (typeof Chart === 'undefined') {
+                        statusGrafico.textContent =
+                            'Não foi possível carregar o gráfico.';
+                        return;
+                    }
+
+                    statusGrafico.textContent = '';
+
+                    grafico = new Chart(canvas, {
+                        type: 'line',
+                        data: {
+                            labels: dadosMoeda.map(function (r) {
+                                return new Date(
+                                    r.data_hora_consulta
+                                ).toLocaleString('pt-BR');
+                            }),
+                            datasets: [{
+                                label: moeda + '/BRL',
+                                data: dadosMoeda.map(function (r) {
+                                    return Number(r.valor);
+                                }),
+                                borderWidth: 2,
+                                tension: 0.2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: false
+                                }
+                            }
+                        }
+                    });
+                }
+
+                seletor.addEventListener('change', atualizarGrafico);
+                atualizarGrafico();
 
                 status.hidden = true;
                 tabela.hidden = false;
