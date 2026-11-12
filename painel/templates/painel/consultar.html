@@ -18,9 +18,16 @@
 {% if sucesso_multiplas %}
     <div class="ok">
         <strong>Cotações registradas:</strong>
+
         {% for item in registros %}
             <p>{{ item.moeda_origem }}/{{ item.moeda_destino }} = R$ {{ item.valor }}</p>
         {% endfor %}
+
+        {% if veio_do_cache %}
+            <p><strong>Origem:</strong> Cache (valores armazenados temporariamente).</p>
+        {% else %}
+            <p><strong>Origem:</strong> Consulta à API externa.</p>
+        {% endif %}
     </div>
 {% endif %}
 

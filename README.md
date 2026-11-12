@@ -9,6 +9,7 @@ guarda o histórico no banco e o exibe com fetch().
 - /api/historico/ (JSON, mais recente primeiro)
 - Consulta múltipla de USD, EUR e BTC em uma única requisição
 - Gráfico de variação das cotações com Chart.js, permitindo selecionar a moeda
+- Cache de cotações por 5 minutos usando django.core.cache
 
 
 ## Como rodar

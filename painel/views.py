@@ -2,6 +2,7 @@ from decimal import Decimal, InvalidOperation
 
 import requests
 from django.conf import settings
+from django.core.cache import cache
 from django.shortcuts import render
 from rest_framework import generics
 
@@ -37,30 +38,58 @@ class HistoricoCotacaoView(generics.ListAPIView):
 
 def consultar_multiplas_cotacoes(request):
     contexto = {}
-    try:
-        resposta = requests.get(settings.COTACOES_MULTIPLAS_URL, timeout=5)
-        resposta.raise_for_status()
-        dados = resposta.json()
 
-        moedas = ['USD', 'EUR', 'BTC']
+    try:
+        chave_cache = 'cotacoes_multiplas_usd_eur_btc'
+        valores = cache.get(chave_cache)
+
+        veio_do_cache = valores is not None
+
+        if valores is None:
+            resposta = requests.get(
+                settings.COTACOES_MULTIPLAS_URL,
+                timeout=5
+            )
+            resposta.raise_for_status()
+
+            dados = resposta.json()
+
+            valores = {}
+
+            for moeda in ['USD', 'EUR', 'BTC']:
+                valores[moeda] = Decimal(
+                    dados[f'{moeda}BRL']['bid']
+                )
+
+            cache.set(chave_cache, valores, timeout=300)
+
         registros = []
 
-        for moeda in moedas:
-            valor = Decimal(dados[f'{moeda}BRL']['bid'])
+        for moeda in ['USD', 'EUR', 'BTC']:
             registros.append(
                 RegistroCotacao(
                     moeda_origem=moeda,
                     moeda_destino='BRL',
-                    valor=valor
+                    valor=valores[moeda]
                 )
             )
 
         RegistroCotacao.objects.bulk_create(registros)
-        contexto = {'sucesso_multiplas': True, 'registros': registros}
+
+        contexto = {
+            'sucesso_multiplas': True,
+            'registros': registros,
+            'veio_do_cache': veio_do_cache
+        }
 
     except requests.exceptions.RequestException:
-        contexto = {'erro': 'Não foi possível consultar as cotações agora.'}
+        contexto = {
+            'erro': 'Não foi possível consultar as cotações agora.'
+        }
+
     except (ValueError, KeyError, TypeError, InvalidOperation):
-        contexto = {'erro': 'A API externa respondeu em um formato inesperado.'}
+        contexto = {
+            'erro': 'A API externa respondeu em um formato inesperado.'
+        }
 
     return render(request, 'painel/consultar.html', contexto)
